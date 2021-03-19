@@ -3,6 +3,7 @@ const models = require('../models');
 
 // get the Cat model
 const Cat = models.Cat.CatModel;
+const Dog = models.Dog.CatModel;
 
 // default fake data so that we have something to work with until we make a real Cat
 const defaultData = {
@@ -45,28 +46,47 @@ const readAllCats = (req, res, callback) => {
   Cat.find(callback).lean();
 };
 
+const readAllDogs = (req, res, callback) => {
+  Dog.find(callback).lean();
+};
+
+
 // function to find a specific cat on request.
 // Express functions always receive the request and the response.
 const readCat = (req, res) => {
   const name1 = req.query.name;
-
+  
   // function to call when we get objects back from the database.
   // With Mongoose's find functions, you will get an err and doc(s) back
   const callback = (err, doc) => {
     if (err) {
       return res.status(500).json({ err }); // if error, return it
     }
-
+    
     // return success
     return res.json(doc);
   };
-
+  
   // Call the static function attached to CatModels.
   // This was defined in the Schema in the Model file.
   // This is a custom static function added to the CatModel
   // Behind the scenes this runs the findOne method.
   // You can find the findByName function in the model file.
   Cat.findByName(name1, callback);
+};
+
+const readDog = (req, res) => {
+  const name1 = req.query.name;
+
+  const callback = (err, doc) => {
+    if(err) {
+      return res.status(500).json({err});
+    }
+
+    return res.json(doc);
+  };
+
+  Dog.findByName(name1, callback);
 };
 
 // function to handle requests to the page1 page
@@ -190,6 +210,22 @@ const searchName = (req, res) => {
   // For that reason, I gave it an anonymous callback instead of a
   // named function you'd have to go find
   return Cat.findByName(req.query.name, (err, doc) => {
+    // errs, handle them
+    if (err) {
+      return res.status(500).json({ err }); // if error, return it
+    }
+
+    // if no matches, let them know
+    // (does not necessarily have to be an error since technically it worked correctly)
+    if (!doc) {
+      return res.json({ error: 'No cats found' });
+    }
+
+    // if a match, send the match back
+    return res.json({ name: doc.name, beds: doc.bedsOwned });
+  });
+
+  return Dog.findByName(req.query.name, (err, doc) => {
     // errs, handle them
     if (err) {
       return res.status(500).json({ err }); // if error, return it
