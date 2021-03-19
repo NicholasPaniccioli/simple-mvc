@@ -338,7 +338,8 @@ const searchDog = (req, res) => {
     }
 
     // if a match, adds one to the age
-    doc.age += 1;
+    let newAge = doc.age;
+    newAge += 1;
 
     // once you change all the object properties you want,
     // then just call the Model object's save function
@@ -346,12 +347,12 @@ const searchDog = (req, res) => {
     const savePromise = doc.save();
 
     // send back the name as a success for now
-    savePromise.then(() => res.json({ name: doc.name, breed: doc.breed, age: doc.age }));
+    savePromise.then(() => res.json({ name: doc.name, breed: doc.breed, age: newAge }));
 
     // if save error, just return an error for now
     // savePromise.catch((err) => res.status(500).json({ err }));
 
-    return res.json({ name: doc.name, breed: doc.breed, age: doc.age});
+    return res.json({ name: doc.name, breed: doc.breed, age: newAge });
   });
 };
 
