@@ -148,6 +148,19 @@ const hostPage3 = (req, res) => {
   readAllDogs(req, res, callback);
 };
 
+const hostPage4 = (req, res) => {
+  const callback = (err, docs) => {
+    if (err) {
+      return res.status(500).json({ err }); // if error, return it
+    }
+
+    // return success
+    return res.render('page4', { dogs: docs });
+  };
+
+  readAllDogs(req, res, callback);
+};
+
 // function to handle get request to send the name
 // controller functions in Express receive the full HTTP request
 // and a pre-filled out response object to send
@@ -325,7 +338,7 @@ const searchDog = (req, res) => {
     }
 
     // if a match, adds one to the age
-    req.query.age += 1;
+    doc.age += 1;
 
     // once you change all the object properties you want,
     // then just call the Model object's save function
@@ -363,6 +376,7 @@ module.exports = {
   page1: hostPage1,
   page2: hostPage2,
   page3: hostPage3,
+  page4: hostPage4,
   readCat,
   readDog,
   getName,
