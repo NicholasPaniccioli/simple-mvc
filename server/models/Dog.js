@@ -11,23 +11,23 @@ const DogSchema = new mongoose.Schema({
   },
 
   breed: {
-      type: String,
-      required: true,
-      trim: true,
-      unique: true,
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
   },
-  
+
   age: {
     type: Number,
     min: 0,
     required: true,
   },
-  
+
   createdDate: {
     type: Date,
     default: Date.now,
   },
-  
+
 });
 
 DogSchema.statics.findByName = (name, callback) => {

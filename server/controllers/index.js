@@ -3,7 +3,7 @@ const models = require('../models');
 
 // get the Cat model
 const Cat = models.Cat.CatModel;
-const Dog = models.Dog.CatModel;
+const Dog = models.Dog.DogModel;
 
 // default fake data so that we have something to work with until we make a real Cat
 const defaultData = {
@@ -57,23 +57,22 @@ const readAllDogs = (req, res, callback) => {
   Dog.find(callback).lean();
 };
 
-
 // function to find a specific cat on request.
 // Express functions always receive the request and the response.
 const readCat = (req, res) => {
   const name1 = req.query.name;
-  
+
   // function to call when we get objects back from the database.
   // With Mongoose's find functions, you will get an err and doc(s) back
   const callback = (err, doc) => {
     if (err) {
       return res.status(500).json({ err }); // if error, return it
     }
-    
+
     // return success
     return res.json(doc);
   };
-  
+
   // Call the static function attached to CatModels.
   // This was defined in the Schema in the Model file.
   // This is a custom static function added to the CatModel
@@ -86,8 +85,8 @@ const readDog = (req, res) => {
   const name1 = req.query.name;
 
   const callback = (err, doc) => {
-    if(err) {
-      return res.status(500).json({err});
+    if (err) {
+      return res.status(500).json({ err });
     }
 
     return res.json(doc);
@@ -203,10 +202,9 @@ const setName = (req, res) => {
   return res;
 };
 
-//Creates the dog
+// Creates the dog
 const createDog = (req, res) => {
-
-  //Checks for name, breed, and age
+  // Checks for name, breed, and age
   if (!req.body.firstname || !req.body.lastname || !req.body.breed || !req.body.age) {
     // if not respond with a 400 error
     // (either through json or a web page depending on the client dev)
@@ -232,7 +230,7 @@ const createDog = (req, res) => {
   savePromise.then(() => {
     // set the lastAdded dog to our newest cat object.
     // This way we can update it dynamically
-    lastDog = newdog;
+    lastDog = newDog;
     // return success
     res.json({ name: lastDog.name, breed: lastDog.breed, age: lastDog.age });
   });
@@ -241,7 +239,7 @@ const createDog = (req, res) => {
   savePromise.catch((err) => res.status(500).json({ err }));
 
   return res;
-}
+};
 
 // function to handle requests search for a name and return the object
 // controller functions in Express receive the full HTTP request
@@ -308,6 +306,42 @@ const updateLast = (req, res) => {
   savePromise.catch((err) => res.status(500).json({ err }));
 };
 
+const searchDog = (req, res) => {
+  // Checks a name was used
+  if (!req.query.name) {
+    return res.status(400).json({ error: 'Name is required to perform a search' });
+  }
+
+  return Dog.findByName(req.query.name, (err, doc) => {
+    // errs, handle them
+    if (err) {
+      return res.status(500).json({ err }); // if error, return it
+    }
+
+    // if no matches, let them know
+    // (does not necessarily have to be an error since technically it worked correctly)
+    if (!doc) {
+      return res.json({ error: 'No dogs with that name found' });
+    }
+
+    // if a match, adds one to the age
+    req.query.age += 1;
+
+    // once you change all the object properties you want,
+    // then just call the Model object's save function
+    // create a new save promise for the database
+    const savePromise = doc.save();
+
+    // send back the name as a success for now
+    savePromise.then(() => res.json({ name: doc.name, breed: doc.breed, age: doc.age }));
+
+    // if save error, just return an error for now
+    // savePromise.catch((err) => res.status(500).json({ err }));
+
+    return res.json({ name: doc.name, breed: doc.breed, age: doc.age});
+  });
+};
+
 // function to handle a request to any non-real resources (404)
 // controller functions in Express receive the full HTTP request
 // and get a pre-filled out response object to send
@@ -330,10 +364,12 @@ module.exports = {
   page2: hostPage2,
   page3: hostPage3,
   readCat,
+  readDog,
   getName,
   setName,
   createDog,
   updateLast,
   searchName,
+  searchDog,
   notFound,
 };
